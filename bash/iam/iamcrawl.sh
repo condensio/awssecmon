@@ -4,27 +4,20 @@
 # This script allows you to inspect the policies attached to a given user
 #
 
+aws iam list-users --output=table
 
-echo "--> Listing all users"
-
-aws iam list-users --output=text
-
-echo "--> Dumping policies for a user"
-
-echo -n "Enter User> "
+echo -n "Enter UserName> "
 read user
 
-aws iam list-attached-user-policies --user-name $user --output=text
+aws iam list-attached-user-policies --user-name $user --output=table
 
-echo "--> Dumping policy info"
-
-echo -n "Enter ARN> "
+echo -n "Enter PolicyArn> "
 read arn
 
-aws iam get-policy --policy-arn $arn 
+policy=`aws iam get-policy --policy-arn $arn`
 
+echo $policy | jq .
 
-echo -n "Enter Policy Version> "
-read version
+version=`echo $policy | jq '.Policy.DefaultVersionId' | tr -d [:punct:]`
 
-aws iam get-policy-version --policy-arn  $arn  --version-id $version
+aws iam get-policy-version --policy-arn  $arn  --version-id $version | jq .
